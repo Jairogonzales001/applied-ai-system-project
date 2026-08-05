@@ -1,0 +1,32 @@
+{
+  "feeding": {
+    "title": "Feeding Guidance",
+    "tip": "Keep feeding times consistent and follow the food portions recommended by your veterinarian or pet food provider.",
+    "source": "PawPal curated guidance"
+  },
+  "walk": {
+    "title": "Exercise Guidance",
+    "tip": "Choose a walk duration and intensity that matches the pet's age, health, breed, and normal activity level.",
+    "source": "PawPal curated guidance"
+  },
+  "medication": {
+    "title": "Medication Safety",
+    "tip": "Give medication only according to instructions from a licensed veterinarian. PawPal does not recommend medication names or dosages.",
+    "source": "PawPal safety policy"
+  },
+  "appointment": {
+    "title": "Appointment Preparation",
+    "tip": "Prepare relevant medical records, current medications, symptoms, and questions before the veterinary appointment.",
+    "source": "PawPal curated guidance"
+  },
+  "grooming": {
+    "title": "Grooming Guidance",
+    "tip": "Use pet-safe grooming products and adjust grooming frequency based on coat type, skin condition, and veterinarian recommendations.",
+    "source": "PawPal curated guidance"
+  },
+  "other": {
+    "title": "General Pet Care",
+    "tip": "Use a consistent routine and contact a licensed veterinarian when a pet shows concerning or unusual symptoms.",
+    "source": "PawPal curated guidance"
+  }
+}
