@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from ai_task_parser import ParsedTask, parse_task_request
+from guardrails import Guardrails
 from knowledge_retriever import KnowledgeRetriever, RetrievedGuidance
 from pawpal_system import Owner, Scheduler, Task
 
@@ -23,7 +24,7 @@ class AIResponse:
 
 
 class AIEngine:
-    """Coordinates parsing, validation, task creation, retrieval, and conflict checking."""
+    """Coordinates safety checks, parsing, task creation, retrieval, and conflicts."""
 
     def __init__(self, owner: Owner):
         if not isinstance(owner, Owner):
@@ -32,11 +33,28 @@ class AIEngine:
         self.owner = owner
         self.scheduler = Scheduler(owner)
         self.retriever = KnowledgeRetriever()
+        self.guardrails = Guardrails()
 
     def process_request(self, user_input: str) -> AIResponse:
         """Process one natural-language task request from start to finish."""
 
         logs = ["Received user request."]
+
+        guardrail_result = self.guardrails.check(user_input)
+
+        if not guardrail_result.allowed:
+            logs.append(
+                "Guardrail blocked request: "
+                + ", ".join(guardrail_result.matched_rules)
+            )
+
+            return AIResponse(
+                success=False,
+                message=guardrail_result.message,
+                logs=logs,
+            )
+
+        logs.append("Request passed guardrail checks.")
 
         try:
             parsed = parse_task_request(
@@ -106,7 +124,8 @@ class AIEngine:
 
         if relevant_conflicts:
             logs.append(
-                f"Detected {len(relevant_conflicts)} conflict(s) involving the new task."
+                f"Detected {len(relevant_conflicts)} conflict(s) "
+                "involving the new task."
             )
 
             message = (
