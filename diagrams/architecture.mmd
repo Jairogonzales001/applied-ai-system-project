@@ -1,0 +1,31 @@
+flowchart TD
+    A[User enters pet care request] --> B[Streamlit Interface]
+
+    B --> C[AI Task Parser]
+    C --> D{Is required information missing?}
+
+    D -- Yes --> E[Ask user for clarification]
+    E --> B
+
+    D -- No --> F[Planning Agent]
+
+    F --> G[Create structured Task objects]
+    G --> H[PawPal Scheduler]
+
+    H --> I[Sort tasks by date, time, and priority]
+    H --> J[Detect schedule conflicts]
+    H --> K[Generate recurring tasks]
+
+    J --> L[Knowledge Retriever]
+    L --> M[Retrieve relevant pet care guidance]
+
+    I --> N[Guardrails and Validation]
+    J --> N
+    K --> N
+    M --> N
+
+    N --> O[Generate schedule and explanation]
+    O --> P[Display result to user]
+
+    O --> Q[Evaluation Logger]
+    Q --> R[Automated tests and human review]
