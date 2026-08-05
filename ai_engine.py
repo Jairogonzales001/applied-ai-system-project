@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from ai_task_parser import ParsedTask, parse_task_request
+from knowledge_retriever import KnowledgeRetriever, RetrievedGuidance
 from pawpal_system import Owner, Scheduler, Task
 
 
@@ -17,11 +18,12 @@ class AIResponse:
     parsed_task: Optional[ParsedTask] = None
     created_task: Optional[Task] = None
     conflicts: list[dict] = field(default_factory=list)
+    knowledge_guidance: Optional[RetrievedGuidance] = None
     logs: list[str] = field(default_factory=list)
 
 
 class AIEngine:
-    """Coordinates parsing, validation, task creation, and conflict checking."""
+    """Coordinates parsing, validation, task creation, retrieval, and conflict checking."""
 
     def __init__(self, owner: Owner):
         if not isinstance(owner, Owner):
@@ -29,9 +31,11 @@ class AIEngine:
 
         self.owner = owner
         self.scheduler = Scheduler(owner)
+        self.retriever = KnowledgeRetriever()
 
     def process_request(self, user_input: str) -> AIResponse:
-        """Process one natural-language task request end to end."""
+        """Process one natural-language task request from start to finish."""
+
         logs = ["Received user request."]
 
         try:
@@ -93,6 +97,7 @@ class AIEngine:
         logs.append(f"Created task for {selected_pet.name}.")
 
         all_conflicts = self.scheduler.detect_conflicts()
+
         relevant_conflicts = self._find_relevant_conflicts(
             selected_pet.name,
             task,
@@ -103,13 +108,28 @@ class AIEngine:
             logs.append(
                 f"Detected {len(relevant_conflicts)} conflict(s) involving the new task."
             )
+
             message = (
-                f"Task added for {selected_pet.name}, but a scheduling "
-                "conflict was detected."
+                f"Task added for {selected_pet.name}, "
+                "but a scheduling conflict was detected."
             )
         else:
             logs.append("No conflicts detected for the new task.")
             message = f"Task successfully added for {selected_pet.name}."
+
+        try:
+            guidance = self.retriever.retrieve(
+                category=parsed.category,
+                query=user_input,
+            )
+
+            logs.append(
+                f"Retrieved '{guidance.title}' with confidence "
+                f"{guidance.confidence:.2f}."
+            )
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            logs.append(f"Knowledge retrieval failed: {exc}")
+            guidance = None
 
         return AIResponse(
             success=True,
@@ -120,11 +140,13 @@ class AIEngine:
             parsed_task=parsed,
             created_task=task,
             conflicts=relevant_conflicts,
+            knowledge_guidance=guidance,
             logs=logs,
         )
 
     def _find_pet(self, pet_name: str):
-        """Return the matching pet without assuming exact capitalization."""
+        """Return the matching pet without requiring exact capitalization."""
+
         for pet in self.owner.pets:
             if pet.name.lower() == pet_name.lower():
                 return pet
@@ -138,6 +160,7 @@ class AIEngine:
         conflicts: list[dict],
     ) -> list[dict]:
         """Return only conflicts involving the newly created task."""
+
         relevant = []
 
         for conflict in conflicts:

@@ -7,7 +7,7 @@ flowchart TD
     D -- Yes --> E[Ask user for clarification]
     E --> B
 
-    D -- No --> F[Planning Agent]
+    D -- No --> F[Task Planning Agent]
 
     F --> G[Create structured Task objects]
     G --> H[PawPal Scheduler]
@@ -16,7 +16,7 @@ flowchart TD
     H --> J[Detect schedule conflicts]
     H --> K[Generate recurring tasks]
 
-    J --> L[Knowledge Retriever]
+    J --> L[Knowledge Retrieval Engine]
     L --> M[Retrieve relevant pet care guidance]
 
     I --> N[Guardrails and Validation]
@@ -27,5 +27,5 @@ flowchart TD
     N --> O[Generate schedule and explanation]
     O --> P[Display result to user]
 
-    O --> Q[Evaluation Logger]
+    O --> Q[Evaluation Harness]
     Q --> R[Automated tests and human review]
